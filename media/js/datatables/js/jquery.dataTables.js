@@ -9721,7 +9721,7 @@
 		/**
 		 * Name for the column, allowing reference to the column by name as well as
 		 * by index (needs a lookup to work by name).
-		 *  @type string
+		 *  @type string 
 		 */
 		"sName": null,
 	

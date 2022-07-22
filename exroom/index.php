@@ -9,6 +9,9 @@
 	require "../media/php/Users.php";
 	require "../media/php/Course.php";
 	require "../media/php/timecoder.php"; 
+	require "../media/php/instituteinfos.php";	
+	
+	$bi = new  Institute_info();
 	
 	$user = new User("users");	
 	
@@ -26,7 +29,7 @@
 	$dbm = new DbTool(); 
 
 	$readyCos = $dbm->getFields($dbm->select_Multi_Distinct(
-		array("code","qtype","year"),"course_schedule",array("state"=>"ready")),array("code","qtype","year"));	
+		array("codegen","year"),"epanel",array("state"=>"ready")),array("codegen","year"));	
 	 
 	
 	
@@ -34,24 +37,25 @@
 	
 	if(isset($_POST['start_paper']))
 		{
-			// $_SESSION['prevNewStart'] = true; $_SESSION['delay_details'] = $mySchedules['code'][0]."_".$mySchedules['qtype'][0]."_".$mySchedules['year'][0];
+			/*** $_SESSION['prevNewStart'] = true; $_SESSION['delay_details'] = 
+			 *** $mySchedules['codegen'][0]."-"."_".$mySchedules['year'][0]; ****/
+			
 			if($_SESSION['prevNewStart'] == true && !empty($_SESSION['delay_details'])){				
-				$_SESSION['alt'] = "error";  $criterials = explode("_",$_SESSION['delay_details']);
+				$_SESSION['alt'] = "error";  $criterials = explode("-",$_SESSION['delay_details']);
 				$_SESSION['stgMsg'] = "You Have Not Completed Your ". $criterials[0]." &nbsp;". $criterials[1]." <br/> <br/>  Kindly Complete The Paper Before You Commence New One!";				
 			}
 			else {  
 			
 			 $dbm = new DbTool();
 			 
-			 $criterials = explode("_",$_POST['start_paper']);
-			 $_SESSION['code'] = $criterials[0]; 
-			 $_SESSION['qtype'] = $criterials[1]; 
-			 $_SESSION['year'] =  $criterials[2]; 
+			 $criterials = explode("-",$_POST['start_paper']);
+			 $_SESSION['codegen'] = $criterials[0]; 			  
+			 $_SESSION['year'] =  $criterials[1]; 
 			
 			// fetch the information 
-			$myCond = array("user_id"=>$_SESSION['exmUser'], "code"=>$_SESSION['code'], "qtype"=>$_SESSION['qtype'], "year"=>$_SESSION['year']);
+			$myCond = array("user_id"=>$_SESSION['exmUser'], "codegen"=>$_SESSION['codegen'], "year"=>$_SESSION['year']);
 			
-			$myDatas = array("sn","user_id","code","year","total_sec","level","totalmark", "unitmark", "totalscore", "point", 
+			$myDatas = array("sn","user_id","codegen","year","total_sec","total_qtn","level","totalmark", "unitmark", "totalscore", "point", 
 			"grade","qtype","paperlogintime", "paperlogouttime", "paper_signal","percent","sec_used","bus_stop","total_qtn"); 
 			
 			$_SESSION['myReports'] = $myReports = $dbm->getFields($dbm->select("users_result",$myCond),$myDatas);			
@@ -63,13 +67,11 @@
  			$_SESSION['myStatus'] = "process";
 			$_SESSION['started'] = true;
 			
-			unset($_SESSION['pasted']); // use this to auto create quetions and saave to database
+			unset($_SESSION['pasted']); // use this to auto create questions and save to database
 			 
 			// save some infos about login 
-			$logintym = date('D jS M, Y - g:i s A');		 		
-			
-			$data = array("paperlogintime"=>$logintym,'currently'=>"on","paper_signal"=>"process");
-			
+			$logintym = date('D jS M, Y - g:i s A');		 					
+			$data = array("paperlogintime"=>$logintym,'currently'=>"on","paper_signal"=>"process");			
 			$dbm->updateTb("users_result",$data,$myCond);
 			
 			header("Location:report.php");
@@ -83,15 +85,14 @@
 		{
 			 $dbm = new DbTool();
 			 
-			 $criterials = explode("_",$_POST['redo_paper']);
-			 $_SESSION['code'] = $criterials[0]; 
-			 $_SESSION['qtype'] = $criterials[1]; 
-			 $_SESSION['year'] =  $criterials[2]; 
+			 $criterials = explode("-",$_POST['redo_paper']);
+			 $_SESSION['codegen'] = $criterials[0]; 			 
+			 $_SESSION['year'] =  $criterials[1]; 
 			
 			// fetch the information 
-			$myCond = array("user_id"=>$_SESSION['exmUser'], "code"=>$_SESSION['code'], "qtype"=>$_SESSION['qtype'], "year"=>$_SESSION['year']);
+			$myCond = array("user_id"=>$_SESSION['exmUser'], "codegen"=>$_SESSION['codegen'], "year"=>$_SESSION['year']);
 			
-			$myDatas = array("sn","user_id","code","year","total_sec","level","totalmark", "unitmark", "totalscore", "point", 
+			$myDatas = array("sn","user_id","codegen","year","total_sec","level","totalmark", "unitmark", "totalscore", "point", 
 			"grade","qtype","paperlogintime", "paperlogouttime", "paper_signal","percent","sec_used","bus_stop","total_qtn"); 
 			
 			$_SESSION['myReports'] = $myReports = $dbm->getFields($dbm->select("users_result",$myCond),$myDatas);			
@@ -101,16 +102,29 @@
 			$_SESSION['init_sec_used'] = $myReports['sec_used'][0];
 			$_SESSION['total_sec'] = $myReports['total_sec'][0];
  			$_SESSION['myStatus'] = "process";
-			$_SESSION['restarted'] = true;
+			$_SESSION['started'] = true;
 			
 			$_SESSION['pasted'] = true; // use this to auto create quetions and saave to database
-			 
+					   
+				// fetch user's questions 
+				/******************************************/
+				 $_SESSION['myQtn'] = $myQtn = $dbm->getFields($dbm->select("qtn_remind",array("user_id"=>$_SESSION['exmUser'],"year"=>$_SESSION['year'],"codegen"=>$_SESSION['codegen'])),
+								array("sn","codegen","num","question","tot_option","optiontype","passage","instruction","option1","option2","option3","option4","option5","answer","typeAns","image1","marks","picked1"));
+				// loop through the options saved
+				for($m=1; $m<=$_SESSION['tot_qtn']; $m++){
+					$_SESSION['picked1'.$m] = $_SESSION['myQtn']['picked1'][($m-1)];
+				}
+				/*******************************************/
+		
+			
 			// save some infos about login 
 			$logintym = date('D jS M, Y - g:i s A');		 		
 			
 			$data = array("paperlogintime"=>$logintym,'currently'=>"on","paper_signal"=>"process");
 			
 			$dbm->updateTb("users_result",$data,$myCond);
+			
+			
 			
 			header("Location:report.php");
 		
@@ -149,7 +163,7 @@
     <link href="../media/css/custom.css" rel="stylesheet"/>
     <link href="../media/fonts/css/font-awesome.min.css" rel="stylesheet"/>
     <link href="../media/css/animate.min.css" rel="stylesheet" />   
-	<link href="../media/images/laflogo.png" rel="shortcut icon" /> 
+	<link href="../media/images/KWCON-LOGO.JPG" rel="shortcut icon" /> 
 	
 	     <!-- jQuery -->
     <script src="../media/js/jquery.min.js"></script>
@@ -208,21 +222,31 @@
 		   <br/> 
 		 <!-- Content Row -->
         <div class="row">
-             <div class="col-lg-10 col-md-10 col-sm-10 col-sm-offset-1">
-                    <div class="panel panel-info text-center">
-                        <div class="panel-heading black">
-                      <h3>  <img src="../media/images/laflogo.png" style="max-height:60px; max-width:120px;" /> &nbsp; 
-					  <b>    KWARA  STATE COLLEGE OF  EDUCATION (TECHNICAL), LAFIAGI </b> </h3>
-                        </div>
+            <div class="col-md-10 col-sm-10 col-sm-offset-1">
+                    <div class="panel panel-primary text-center bg-primary">
+                        <div class="panel-body black bg-primary"> 
+							<div class="col-md-sm-2 col-md-2"> 
+								<img src="<?php   echo "../media/images/".$bi->logo; ?> " style="max-height:80px; max-width:120px;" 	class="img img-responsive  img-thumbnail  img-circle" />
+							</div>
+							
+							<div  class="col-md-8 col-sm-8">
+								  <br/>
+								<h3 class="bold">    <?php   echo $bi->institutename; ?> </h3>  
+								
+							</div>
+							
+							<div  class="col-md-sm-2 col-md-2 pull-right"> 
+									 <img src="../media/images/KWCON-LOGO2.jpg " style="max-height:80px; max-width:120px;" class="img img-responsive img-thumbnail" /> 
+							</div>
+						
+						  </div>
                         <!-- /.panel-heading -->
                              
                         </div> 
-                    </div>
-                 
-            <!-- /.col-lg-12 -->
-        </div>
-        <!-- /.row --> 
-	 
+              </div>
+         
+		</div>
+		<!-- /.row -->
 		<div class="row">
 		
 			<div class="col-lg-10 col-md-10 col-sm-10 col-sm-offset-1">
@@ -246,16 +270,20 @@
                                             <!-- end of image cropping -->
                                             <div id="crop-avatar">
                                                 <!-- Current avatar -->
-                                                <div class="avatar-view" title="<?php echo $allUser['surname'][0]."&nbsp;".$allUser['firstname'][0]."&nbsp;".$allUser['midname'][0] ; ?>">                                                     <img src="<?php echo "../media/user_imgs/".$myInfo['passport'][0];?>" alt="<?php echo "../media/user_imgs/".$myInfo['user_id'][0];?>">
+                                                <div class="avatar-view" title="<?php echo $allUser['surname'][0]."&nbsp;".$allUser['firstname'][0]."&nbsp;".$allUser['midname'][0] ; ?>">
+												<center>
+												<img src="<?php echo "../media/user_imgs/".$myInfo['passport'][0];?>" alt="<?php echo "../media/user_imgs/".$myInfo['user_id'][0];?>" style="max-width:180px; max-height:180px" />
+												</center>
                                                 </div>  
 											</div>
                                             <!-- end of image cropping -->
                                         </div>
 										
 										<h4 class="text-uppercase"> <b>
-										<i class="fa fa-user"></i>&nbsp; <?php echo $_SESSION['exmUser'];?> </b> 
+										<i class="fa fa-user"></i>&nbsp;  ID: <?php echo $_SESSION['exmUser'];?> </b> 
 										</h4>
-										   <ul class="list-unstyled user_data">
+										   
+										   <!-- <ul class="list-unstyled user_data">
                                             <li><i class="fa fa-signal user-profile-icon"></i>  Level &nbsp; <?php echo $myInfo['level'][0]; ?>
                                             </li>
 											
@@ -265,19 +293,12 @@
 											<li>
                                                 <i class="fa fa-briefcase user-profile-icon"></i> Faculty. &nbsp;  <?php echo $myInfo['faculty'][0]; ?>
                                             </li>
-                                        </ul>
+                                        </ul> -->
 									
 									</div> <!-- /. col-sm-3 -->
 									
 									<div class="col-md-9 col-sm-9 col-xs-12">
 
-											<div class="profile_title">
-												<div class="col-md-6">
-													<h4> <b>Course Assessment Schedule </b> </h4>
-												</div>   
-												
-											</div>
-											
 											<div  class="tab_content">	
 												
 											 <br/>
@@ -285,8 +306,8 @@
 											 <!-- .. fetch all the courses available for schedule currently -->
 											<?php 
 												/** count all the available courses first */
-												if(count($readyCos['code'])==0){ 
-												/*** no course is available for assessment currently **/
+												if(count($readyCos['codegen'])==0){ 
+												/*** Seems No course is available for assessment currently **/
 												?>
 												<table class="table table-responsive "> <!-- table-bordered table-stripped -->
 												 
@@ -318,50 +339,52 @@
 												/*** display all available course and check for their state  **/ 												 
 												 ?>
 												<div class=" ">
-													<h2> Please select any of the underlisted papers for your assessment </h2>
+													<h2> Click on Start Button To Commence Your Assessment... </h2>
 													   <br/>
 												</div>
 											
 												
-												<table class="table table-responsive table-stripped "> <!-- table-bordered table-stripped -->
-												 <thead style="background:#000; color:#FFF; ">
+												<table class="table table-responsive table-stripped jambo_table"> <!-- table-bordered table-stripped -->
+												  <thead >
 													<tr>
 														<th> S/N </th>
-														<th> Course Title</th>
-														<th> Course Code</th>
-														<th> Type</th>
+													<th> Course Title</th>														 
 														<th> Time Allowed  </th>
 														<th> Time Left .</th>
-														<th> Status </th>														
+														<th> &nbsp; </th>														
 													</tr>
 												
-												</thead> 
+												</thead>  
 												
 												<tbody>
-													
+													 
 													<?php  // display all users schedule  	?>
 													<?php 
 													/****************************************/
 											// fetch the assessment that the user is doing now from results 
-											$n = 0; foreach($readyCos['code'] as $scode) { 
+											$n = 0; foreach($readyCos['codegen'] as $scode) { 
 																							
 												## check the student's result for confirmation 
 												$dbm = new DbTool(); 
-												$courses = new Course();   $cosInfo = $courses->getAll(array("code"=>$scode));										
+												$courses = new Course();  
+												// $cosInfo = $courses->getAll(array("code"=>$scode));			
 												
-												$cond = array("user_id"=>$_SESSION['exmUser'], "code"=>$scode, "qtype"=>$readyCos['qtype'][$n], "year"=>$readyCos['year'][$n]);
-												$datas = array("sn", "user_id", "code", "year", "total_qtn", "total_sec", "level",
+												$cosInfo = $dbm->getFields($dbm->select("epanel",array("codegen"=>$scode,"year"=>$readyCos['year'][$n])),array("sn","codegen","year","title"));
+												
+												$cond = array("user_id"=>$_SESSION['exmUser'], "codegen"=>$scode,"year"=>$readyCos['year'][$n]);
+												
+												$datas = array("sn", "user_id", "codegen", "year", "total_qtn", "total_sec", "level",
 																"totalmark", "unitmark", "totalscore", "point", "grade","qtype",
 																"paperlogintime", "paperlogouttime", "paper_signal", "percent","sec_used","bus_stop"); 
 												$mySchedules = $dbm->getFields($dbm->select("users_result",$cond),$datas);
 											
 												?>
 												
-													<tr>
+													<tr class="bold">
 														<td> <?php echo ($n+1); ?> </td>
-														<td> <?php echo $cosInfo['name'][0]; ?> </td>
-														<td> <?php echo $scode;  ?> </td>
-														<td> <b> <?php echo $readyCos['qtype'][$n]; ?> </b> </td>
+														<td>  <?php echo $cosInfo['title'][0]; ?>  </td>
+														<!-- <td> <?php // echo $scode;  ?> </td>
+														<td> <b> <?php // echo $readyCos['qtype'][$n]; ?> </b> </td>  -->
 														<td> <p> <?php 
 															echo readTime($mySchedules['total_sec'][0]);
 															 
@@ -379,34 +402,34 @@
 																		echo readTime($rem);   ?>  
 																	 </p>															
 																		
-																		<div class="progress  right progress_sm ">
-																			<div class="<?php  $dbm->readColor($cent);?>  " role="progressbar" data-transitiongoal="<?php echo $cent;?>"></div>
+																		<div class="progress  right progress-striped progress_sm ">
+																			<div class="<?php  $dbm->readColor($cent);?>  " role="progressbar" data-transitiongoal="<?php  echo $cent;?>"></div>
 																		</div> 
 																</td>
 														
 																<td> 
-																	<button class="btn btn-success" name = "start_paper" value="<?php echo $mySchedules['code'][0]."_".$mySchedules['qtype'][0]."_".$mySchedules['year'][0]; ?>"> Start .. </button> 														
+																	<button class="btn btn-success" name = "start_paper" value="<?php echo $mySchedules['codegen'][0]."-".$mySchedules['year'][0]; ?>"> Start .. </button> 														
 																</td>	
 																 	
 																<?php  } 
 																 
 																	else if($mySchedules['paper_signal'][0]=="process"){
-																		$_SESSION['prevNewStart'] = true; $_SESSION['delay_details'] = $mySchedules['code'][0]."_".$mySchedules['qtype'][0]."_".$mySchedules['year'][0];
+																		$_SESSION['prevNewStart'] = true; $_SESSION['delay_details'] = $mySchedules['codegen'][0]."-".$mySchedules['year'][0];
 																		 
 																		$dbm = new DbTool();																		
 																		$rem = ($mySchedules['total_sec'][0] - $mySchedules['sec_used'][0]); 
 																		$cent = ($rem / $mySchedules['total_sec'][0])*100;
 																	?>
 																	<td> <p> <?php 
-																		echo readTime($rem);  ?>  </p>															
+																		echo readTime($rem);  ?>  </p>				
 																		
-																		<div class="progress  right progress_sm">
+																		<div class="progress  right progress-striped progress_sm">
 																			<div class="<?php echo $dbm->readColor($cent);?>" role="progressbar" data-transitiongoal="<?php echo $cent;?>"></div>
 																		</div> 
 																	</td>
 														
 																<td>
-																<button class="btn btn-warning" name = "redo_paper" value="<?php echo $mySchedules['code'][0]."_".$mySchedules['qtype'][0]."_".$mySchedules['year'][0]; ?>"> Continue.. </button> 
+																<button class="btn btn-warning" name = "redo_paper" value="<?php echo $mySchedules['codegen'][0]."-".$mySchedules['year'][0]; ?>"> Continue.. </button> 
 																	
 																</td> 
 																<?php 	 
@@ -417,7 +440,7 @@
 																		<td> <p> <?php 
 																			echo readTime(0); $cent = 0; ?>  </p>															
 																			
-																			<div class="progress  right progress_sm">
+																			<div class="progress progress_sm right progress-striped">
 																				<div class="<?php echo $dbm->readColor($cent);?>" role="progressbar" data-transitiongoal="<?php echo $cent;?>"></div>
 																			</div> 
 																		</td>
@@ -430,7 +453,7 @@
 																	else if(empty($mySchedules['user_id'])) { ?>
 																		
 																		<td colspan="2">
-																			<p class="red text-uppercase"> You are not scheduled for the <?php echo $readyCos['qtype'][$n]?>, Check Back Later! </p>
+																			<p class="red text-uppercase"> You are not scheduled for the <?php echo $cosInfo['title'][$n]?>, Check Back Later! </p>
 																		</td>
 																		
 																	<?php } 	?>

@@ -39,8 +39,8 @@
 		$disYear = $dbm->getFields($dbm->select_Distinct("year","questions",array("code"=>$_SESSION['coscode'])),array('year'));
 		$disType = $dbm->getFields($dbm->select_Distinct("qtype","questions",array("code"=>$_SESSION['coscode'],"year"=>$_SESSION['cosyear'])),array('qtype'));
 		// $ = 
-		$allQtns = $dbm->getFields($dbm->select("questions",array("year"=>$_SESSION['cosyear'],"code"=>$_SESSION['coscode'],"qtype"=>$_SESSION['questype']),array("num")),
-		array("sn","num","question","option1","option2","option3","option4","option5","answer","marks","optiontype","typeAns","image1","image2","passage"));
+		$allQtns = $dbm->getFields($dbm->select("questions",array("year"=>$_SESSION['cosyear'],"code"=>$_SESSION['coscode'],"qtype"=>$_SESSION['questype']),array("num"),"AND","ASC"),
+		array("sn","num","question","option1","option2","option3","option4","option5","answer","marks","optiontype","typeAns","image1","image2","passage","instruction"));
 		$totMarks = array_sum($allQtns['marks']);
 		
 		$cosInfo = $courses->searchCourse(array("code"=>$_SESSION['coscode'])); 
@@ -217,10 +217,10 @@
                     </div> <!--/. col-md-1 -->
                     
                    <div class="col-md-5 col-sm-5 col-xs-12">                    
-                    	
-						<div> <label class="btn <?php echo $msgAlert;?>"<?php echo $display; // off or on ?>> <span><i class="glyphicon <?php echo $tagSign; ?>"></i></span> <?php # print $_SESSION['saveMsg']; ?> </label> </div>
-						
-                    </div> <!--/. col-md-6 -->
+                    	 
+			 	</div>
+						 
+                    </div> <!--/. col-md-5 -->
                     
                     </form>
                     </div> <!--/. panel-body-->
@@ -244,7 +244,7 @@
                                     <div class="clearfix"></div>
                                 </div>
                                 <div class="x_content"> 									
-                                    <table id="example" class="table table-striped table-bordered responsive-utilities jambo_table">
+                                    <table id="qtnTable" class="table table-striped table-bordered responsive-utilities jambo_table">
                                         <thead>
                                             <tr class="headings">
                                                 <th>
@@ -270,7 +270,11 @@
                                                     <input type="checkbox" class="qtnDel checkbox tableflat" name="qtnDel[]" value="<?php echo $allQtns['sn'][$sn]; ?>">
                                                 </td>
                                                 <td class=" "> <input type="text" name="<?php echo "updn".$allQtns['sn'][$sn]; ?>" id="<?php echo "updn".$allQtns['sn'][$sn]; ?>" value="<?php echo $allQtns['num'][$sn]; ?>" class="qnumUpd form-control" style="width:60px;" /> <?php // echo $sn+1; ?> </td>
-                                                <td class=" "><?php echo $qtn;  ?>   </td>												
+                                                <td class=" "><?php  echo ($allQtns['instruction'][$sn]!="")?"<em><small>".$allQtns['instruction'][$sn]."</small></em><br/>":"";   echo $qtn;  ?>   
+												
+												<?php if($allQtns['image1'][$sn] !="") echo "<label rel='popes' class='btn btn-default btn-warning text-warning btn-xs' title=' Question Attachment' for='".$allQtns['image1'][$sn]."'>   image <i class='fa fa-paperclip'></i> </label>" ?>
+												
+												</td>												
 												<td><span class="btn btn-primary"><?php echo $allQtns['marks'][$sn]; ?></span></td>
 												
 											<?php  if($allQtns['optiontype'][$sn]=="choice") { ?>
@@ -291,16 +295,12 @@
 											<?php }?>
 
 											   
-												<td> <button class="mdqx btn btn-info small" title="Update"  type="submit" name="mdqx" value="<?php echo $allQtns['sn'][$sn]." ";?>"><i class="fa fa-edit"></i></button>
+												<td> <button class="mdqx btn btn-info btn-sm" title="Update"  type="submit" name="mdqx" value="<?php echo $allQtns['sn'][$sn]." ";?>"><i class="fa fa-edit"></i></button>
 													<?php  
-														if($allQtns['passage'][$sn]!=""){?>
-															<span class="btn btn-primary small" title="Passage : <?php echo strip_tags($allQtns['passage'][$sn]); ?> "><i class="fa fa-book"></i></span>
-														<?php } 
-														
-														if($allQtns['image1'][$sn]!=""){?>
-															<span class="btn btn-warning small" title="View Attachment"><i class="fa fa-paperclip"></i></span>
-														<?php } 
-?>
+														if($allQtns['passage'][$sn]!=""){?>															
+															<button type="button" class="btn btn-primary btn-sm" title=" Question Passage" data-placement="left" data-toggle="popover" data-content=" <?php echo strip_tags($allQtns['passage'][$sn]); ?>"><i class="fa fa-book" ></i></button>
+															
+														<?php }  ?>
 												</td>
                                             </tr> 
                                             <?php $sn++; } ?>
@@ -308,7 +308,8 @@
                                         </tbody>
                                     </table>
 
-									
+													
+								
 								</div>
                             </div> <!--  /. x_panel-->
 							  
@@ -352,13 +353,20 @@
  <script>
 		
 		function reSearch(){
-			$('#searchQues').click();
+			$('#searchQues').click(); 
 		}
 			
 			$(document).ready(function (){
 				
-		/**********************************************/
-				
+		/******************************************** 
+		 	 $('#qtnTable').DataTable({ 
+			 	//  "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
+				 "sPaginationType": "full_numbers",  "lengthMenu": [[10, 50, 100,200,500, -1], [10, 50, 100, 200,500, "All"]] //[10, 25, 50, 100,200, "All"]
+			 });
+		 
+		***////////////////////////////////////////////
+		 
+		
 		// toggle delete seletion button delSel 
 		 	
 			$('#delSel').hide('fast');
@@ -421,7 +429,25 @@
 	}		
 /********************/
 		
+		$(function () {
+			$('[data-toggle="popover"]').popover(); 
+			// Add custom JS here
 			
+			$('label[rel=popes]').on('mouseover',function(){
+				var res = "../exroom/imgs/"+$(this).attr('for');					
+					$(this).popover(
+					{
+					 html: true,
+			  
+					placement: 'right',
+					content: function(){return '<img src="'+ res + '" style="max-width:250px; max-height:450px;" />';} 
+					});
+
+				
+				});
+			
+		//	alert('poping');
+		});
 			 
 	</script>
 	 

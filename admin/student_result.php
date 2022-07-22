@@ -27,12 +27,13 @@
 	####### break result critrials  
 	$newConds = $_SESSION['stud_result_criterial'];
 	$me = $dbm->getFields($dbm->select("users",array("user_id"=>$newConds[0])),array("surname","firstname","midname","passport","level","department"));
+	
 	$mycosInfo = $courses->searchCourse(array("code"=>$newConds[2])); 
-	$_SESSION['myQtn'] = $myQtn = $dbm->getFields($dbm->select("qtn_remind",array("user_id"=>$newConds[0],"year"=>$newConds[1],
-				 "qtype"=>$newConds[3],"code"=>$newConds[2])),
-					array("sn","code","year","qtype","num","marks","question","tot_option","optiontype","passage","option1","option2","option3","option4","option5","answer","typeAns","image1","image2","picked1"));
+	
+	$_SESSION['myQtn'] = $myQtn = $dbm->getFields($dbm->select("qtn_remind",array("user_id"=>$newConds[0],"year"=>$newConds[1],"codegen"=>$newConds[2])),
+					array("sn","code","year","qtype","num","marks","question","tot_option","optiontype","passage","instruction","option1","option2","option3","option4","option5","answer","typeAns","image1","image2","picked1"));
 	$_SESSION['myResult']  = $dbm->getFields($dbm->select("users_result",array("user_id"=>$newConds[0],"year"=>$newConds[1],
-				 "qtype"=>$newConds[3],"code"=>$newConds[2]),array("user_id")),array("user_id","year","totalmark","totalscore","percent","paperlogintime","paperlogouttime","sn","code","qtype","year","paper_signal","sec_used","bus_stop","total_sec"));
+				"codegen"=>$newConds[2]),array("user_id")),array("user_id","year","totalmark","totalscore","percent","paperlogintime","paperlogouttime","sn","code","qtype","year","paper_signal","sec_used","bus_stop","total_sec"));
 	#######################################################################
 		
 ?>
@@ -90,12 +91,21 @@
 												<?php 
 													$n = 0; if(!empty($_SESSION['myQtn'])) foreach($_SESSION['myQtn']['num'] as $num ) {  ?>
 													<div class="form-group even">
-														<p> <b><i><?php echo $num.")"; ?> </i> </b>
+														<p> <label><b><i><?php echo $num.")"; ?> </i> </b></label>
 															<!-- check for passage in question -->
 															<?php if($_SESSION['myQtn']['passage'][$n]!="") {?>
-																<p class="font-16 red"> <label> <i> Passage </i></label> <br/> <?php echo  $_SESSION['myQtn']['passage'][$n]; ?></p> <br/>
+																<p class="font-13 red"> <label> <i> Passage </i></label> <br/> <?php echo  $_SESSION['myQtn']['passage'][$n]; ?></p> <br/>
 															<?php } ?>  
-															<?php echo $_SESSION['myQtn']['question'][$n]; ?>
+															
+															<?php if($_SESSION['myQtn']['instruction'][$n]!="") {?>
+																<span class="font-13 blue"> <label> </label> <br/> <?php echo  $_SESSION['myQtn']['instruction'][$n]; ?></span> <br/>
+															<?php } ?>  
+															
+															<?php if($_SESSION['myQtn']['image1'][$n]!="") {?>
+																<span class="font-13 blue"> <label> </label> <br/> <img class="img img-responsive" src="<?php echo "../exroom/imgs/". $_SESSION['myQtn']['image1'][$n]; ?>" style="max-width:150px; max-height:150px;" /></span> <br/>
+															<?php } ?>  
+															
+															<?php echo stripslashes($_SESSION['myQtn']['question'][$n]); ?>
 														</p>
 														
 														

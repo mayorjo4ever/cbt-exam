@@ -2,7 +2,11 @@
 		
 	error_reporting(1);
 	if(!isset($_SESSION))session_start();
+	 // require "media/php/dbTool.php";
+	require "media/php/User.php";
 	
+	require "media/php/instituteinfos.php";	
+	$bi = new  Institute_info();	
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,14 +20,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	
     
-    <title> ONLINE COMPUTER BASED TEST </title>    
+    <title><?php   echo $bi->institutename; ?> </title>    
 	
 	<link href="media/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="media/css/custom.css" rel="stylesheet"/>
     <link href="media/fonts/css/font-awesome.min.css" rel="stylesheet"/>
     <link href="media/css/animate.min.css" rel="stylesheet" />
     <link href="media/css/icheck/flat/green.css" rel="stylesheet" /> 
-	<link href="media/images/laflogo.ico" rel="shortcut icon" /> 
+	<link href="media/images/KWCON-LOGO.JPG" rel="shortcut icon" /> 
 	<link href="media/css/pnotify.custom.min.css" rel="stylesheet"/>
 	<script src="media/js/jquery.min.js"></script>
 	<script src="media/js/pnotify.custom.min.js"></script>
@@ -41,12 +45,22 @@
 		 <!-- Content Row -->
         <div class="row">
              <div class="col-md-10 col-sm-10 col-sm-offset-1">
-                    <div class="panel panel-info text-center">
-                        <div class="panel-heading black">
-						  <h3>  <img src="media/images/laflogo.png" style="max-height:60px; max-width:120px;" /> &nbsp; 
-						  <b>    ONLINE COMPUTER BASED TEST </b> 
-						   &nbsp; &nbsp; <a href="#login" class="btn btn-primary btn-lg bold" data-toggle="modal" data-target="#loginMenu"> &nbsp; Login &nbsp; <span class="fa fa-sign-in ">  </span> </a>
-						  </h3>
+                    <div class="panel panel-primary text-center bg-primary">
+                        <div class="panel-body black bg-primary"> 
+							<div class="col-md-sm-2 col-md-2"> 
+								<img src="<?php   echo "media/images/".$bi->logo; ?> " style="max-height:80px; max-width:120px;" 	class="img img-responsive  img-thumbnail  img-circle" />
+							</div>
+							
+							<div  class="col-md-8 col-sm-8">
+								  <br/>
+								<h3 class="bold">    <?php   echo $bi->institutename; ?> </h3>  
+								
+							</div>
+							
+							<div  class="col-md-sm-2 col-md-2 pull-right"> 
+									 <img src="media/images/KWCON-LOGO2.jpg " style="max-height:80px; max-width:120px;" class="img img-responsive img-thumbnail" /> 
+							</div>
+						
 						  </div>
                         <!-- /.panel-heading -->
                              
@@ -60,25 +74,65 @@
 	 
 	 <div class="row"> 
 	 <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 col-sm-offset-1">	 
-		<div class="col-md-12 col-sm-12 col-xs-12">
+		
+		<div class="col-md-2 col-sm-2 col-xs-4 bg-info ">
+			 
+				 <!-- required for floating -->
+                                        <!-- Nav tabs -->
+                                        <ul class="nav nav-tabs tabs-left">
+                                            <li class="active"><a href="#home" data-toggle="tab"><i class="glyphicon glyphicon-home"></i>&nbsp;  Home</a>
+                                            </li>
+                                            <li><a href="#home" data-toggle="tab"><i class="fa fa-warning"></i>&nbsp; Instructions</a>
+                                            </li>
+                                            <li><a href="#home" data-toggle="tab"><i class="fa fa-support"></i>&nbsp; Supports</a>
+                                            </li>
+                                            <li><a href="#home" data-toggle="tab"><i class="glyphicon glyphicon-phone-alt"></i>&nbsp; Contact</a>
+                                            </li>
+											<li>
+												<button class="btn btn-info btn-lg  " data-toggle="modal" data-target="#loginMenu"> &nbsp; Login  Here &nbsp; <span class="fa fa-sign-in ">  </span> </button> 
+											</li>
+                                        </ul>
+			  
+		</div>
+		
+		<div class="col-md-10 col-sm-10 col-xs-8">
  	
-	 
-	 <!-- Carousel
-    ================================================== -->    
-     <div id="myCarousel" class="carousel slide" data-ride="carousel">
-      <!-- Indicators -->
-      <ol class="carousel-indicators">
-        <li data-target="#myCarousel" data-slide-to="0" class="active"></li>        
-        <li data-target="#myCarousel" data-slide-to="1"></li>
-		<li data-target="#myCarousel" data-slide-to="2"></li>
-      </ol>  
+		<!-- Tab panes -->
+                      <div class="tab-content">
+							<div class="tab-pane active" id="home">
+                                  <!-- <p class="lead">WELCOME TO KWCOETL LAFIAGI  </p> --> 
+                                  	 <!-- Carousel
+										================================================== -->    
+							 <div id="myCarousel" class="carousel slide" data-ride="carousel">
+								
+								<?php $dbm = new DbTool(); 
+									$slides = $dbm->getFields($dbm->select("slides",array('')),array("name","address")); 
+			
+								?>
+								
+							  <!-- Indicators -->
+							  <ol class="carousel-indicators">
+							  <?php $n = 0; 
+								if(!is_null($slides)){
+									foreach($slides['name'] as $simg) { ?> 
+								<li data-target="#myCarousel" data-slide-to="<?php echo $n; ?>" class="<?php echo ($n==0)?'active':''; ?>"></li>        								
+							   <?php $n++; 
+									}
 
-	 
+								}		?>
+							  </ol>  
+
+							 
       <div class="carousel-inner" role="listbox">
 			
-        <!--  <.item 1> -->
-		<div class="item active">
-          <img class="first-slide img-responsive img-rounded" src="media/slides/slide1.jpg" >
+		<?php //display the slides 
+				$n = 0; 
+				if(!is_null($slides)){
+					foreach($slides['name'] as $simg) { ?>
+						
+							<!--  <.item 1> -->
+		<div class="item <?php echo ($n==0)?"active":""; ?>">
+          <img class="first-slide img-responsive img-rounded" src="<?php echo $slides['address'][$n]."".$simg;?>" style=" max-height:350px; min-width:937px;" />
           <div class="container">
             <div class="carousel-caption">
              <!-- <h1> Mayorjo </h1>     -->
@@ -91,57 +145,18 @@
 						&nbsp;&nbsp; <span class="glyphicon glyphicon-pause"></span> &nbsp;&nbsp;
 					</button>	
 				</center>	
-			 <p>&nbsp; </p> <p>&nbsp; </p>
+			 <p> <h3>2016 Enterance Examination... </h3> </p> <p>&nbsp; </p>
 			 
             </div>
 				
           </div>
         </div>
         <!--  </.item 1> -->
-		
-		<!--  <.item 2> -->
-        <div class="item">
-			 
-         <img class="third-slide img-responsive img-rounded" src="media/slides/slide4.jpg" alt="second slide">
-          <div class="container">
-            <div class="carousel-caption">
-             <!-- <h1>Company LTD. </h1> -->
-			 
-			 <center>
-					<button  type="button" class="playButton btn btn-default btn-xs">
-						&nbsp;&nbsp; <span class="glyphicon glyphicon-play"></span> &nbsp;&nbsp;
-					</button>
-					
-					<button  type="button" class=" pauseButton btn btn-default btn-xs">
-						&nbsp;&nbsp; <span class="glyphicon glyphicon-pause"></span> &nbsp;&nbsp;
-					</button>	
-			 </center>	
-			 <p>&nbsp; </p> <p>&nbsp; </p>
-			 
-            </div>
-          </div>
-        </div>
-		<!--  <.item 3> -->
-		 <div class="item">
-         <img class="fourth-slide img-responsive img-rounded" src="media/slides/slide3.jpg" alt="third slide">
-          <div class="container">
-            <div class="carousel-caption">
-             <!-- <h1>Company LTD. </h1> -->
-							 <center>
-					<button  type="button" class="playButton btn btn-default btn-xs">
-						&nbsp;&nbsp; <span class="glyphicon glyphicon-play"></span> &nbsp;&nbsp;
-					</button>
-					
-					<button  type="button" class=" pauseButton btn btn-default btn-xs">
-						&nbsp;&nbsp; <span class="glyphicon glyphicon-pause"></span> &nbsp;&nbsp;
-					</button>	
-			 </center>	
-			 <p>&nbsp; </p> <p>&nbsp; </p>
-			 
-            </div>
-          </div>
-        </div>
-		<!--  </.item 3> --> 
+							
+					<?php $n++; }
+				}
+		?>	
+         
 		 	</div> <!-- /. inner  -->
 		 <!-- carousel controls -->
 	   
@@ -156,29 +171,24 @@
 			<span class="sr-only">Next</span>
 		  </a> 
 			</div> 	<!-- /. carousel-->
-					  		 
-		</div>
-		<!-- /.col-md-12 -->
+
+										
+                            </div>
+                            <div class="tab-pane" id="profile">Profile Tab.</div>
+                            <div class="tab-pane" id="messages">Messages Tab.</div>
+                            <div class="tab-pane" id="settings">Settings Tab.</div>
+                         </div>
 		
-		</div><!-- /.col-md-10 -->
+		<!-- /. Tab panes -->
+		
+					  		 
+	 </div> <!-- /.col-md-10 -->
+		
+		</div><!-- /.col-lg-10 -->
 		
 		</div>  <!-- /.row -->
 		<br/>
-	<!-- Content Row -->
-        <div class="row">
-             <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 col-sm-offset-1 ">
-                    <div class="panel panel-default text-center">
-                        <div class="panel-heading black">
-                      <h4>   Motto: Education For Self Reliance   </h4>
-                        </div>
-                        <!-- /.panel-heading -->
-                             
-                        </div> 
-             </div>
-                 
-            <!-- /.col-lg-12 -->
-        </div>
-        <!-- /.row --> 
+	
 		
 		<div class="row">
 			<div class="col-lg-12">

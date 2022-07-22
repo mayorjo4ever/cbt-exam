@@ -260,7 +260,7 @@
 			
 						req.done(function(d){ 
 							
-							alert(d);
+							alert($.trim(d));
 							
 							});
 				 

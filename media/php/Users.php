@@ -1,6 +1,6 @@
 <?php 	
 	
-	   require "dbTool.php";
+	  require_once "dbTool.php";
 	
 		class User{
 				

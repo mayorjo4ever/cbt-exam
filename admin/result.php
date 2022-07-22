@@ -33,8 +33,8 @@
 	// clicking search button 		
 		if(isset($_POST['searchResult'])){
 			$_SESSION['year'] = $_POST['year'];
-			$_SESSION['code'] = $_POST['code'];
-			$_SESSION['qtype'] = $_POST['qtype'];								 
+			$_SESSION['codegen'] = $_POST['code'];
+			// $_SESSION['qtype'] = $_POST['qtype'];								 
 			 
 		}
 		 /*************************************/
@@ -42,20 +42,20 @@
 		 $resultCond = array();
 			
 			$aYear = array("year"=>$_SESSION['year']);
-			$aCode = array("code"=>$_SESSION['code']);
-			$qType = array("qtype"=>$_SESSION['qtype']);
+			$aCode = array("codegen"=>$_SESSION['codegen']);
+			// $qType = array("qtype"=>$_SESSION['qtype']);
 			
 			if($_SESSION['year']!=""){
 					$resultCond = array_merge($resultCond,$aYear);
 			}
 			
-			if($_SESSION['code']!=""){
+			if($_SESSION['codegen']!=""){
 					$resultCond = array_merge($resultCond,$aCode);
 			}
 			
-			if($_SESSION['qtype']!=""){
-					$resultCond = array_merge($resultCond,$qType);
-			}
+			// if($_SESSION['qtype']!=""){
+			//		$resultCond = array_merge($resultCond,$qType);
+			// }
 			 
 	/*********************************************/
 	 
@@ -65,16 +65,16 @@
  
 	$distcYear = $dbm->getFields($dbm->select_Distinct("year","users_result",array()),array("year"));
 		//
-		$distcCode = $dbm->getFields($dbm->select_Distinct("code","users_result",array("year"=>$_SESSION['year'])),array("code"));
+		$distcCode = $dbm->getFields($dbm->select_Distinct("codegen","users_result",array("year"=>$_SESSION['year'])),array("codegen"));
 		//
-		 $distcType = $dbm->getFields($dbm->select_Distinct("qtype","users_result",array("year"=>$_SESSION['year'],"code"=>$_SESSION['code'])),array("qtype"));
+		// $distcType = $dbm->getFields($dbm->select_Distinct("qtype","users_result",array("year"=>$_SESSION['year'],"code"=>$_SESSION['code'])),array("qtype"));
 			
 		/*******************************************/		
-		$cosInfo = $courses->searchCourse(array("code"=>$_SESSION['code'],'level')); 
-		$_SESSION['level'] = $cosInfo['level'][0];
+		//$cosInfo = $courses->searchCourse(array("code"=>$_SESSION['code'],'level')); 
+		//$_SESSION['level'] = $cosInfo['level'][0];
 		/*******************************************/
 		
-		$examStudents = $dbm->getFields($dbm->select("users_result",$resultCond,array("user_id")),array("user_id","year","totalmark","totalscore","percent","paperlogintime","paperlogouttime","sn","code","qtype","year","paper_signal","total_sec","sec_used"));
+		$examStudents = $dbm->getFields($dbm->select("users_result",$_SESSION['resCond'],array("user_id")),array("user_id","year","totalmark","totalscore","percent","paperlogintime","paperlogouttime","sn","codegen","year","paper_signal","total_sec","sec_used"));
 		
  
 		/***** to download result 	
@@ -88,8 +88,18 @@
 		} 
 	/***************************************************************/
 		
+	/*********************************************************/
+		if(isset($_POST['downloadSMS'])){ 					 
+			//
+			$dbm = new DbTool();
+			$req = $dbm->remap($_SESSION['resCond']); 
+			
+			header("Location:downloadSMS.php?$req");
+		} 
+	/***************************************************************/	
+		
 	if(isset($_POST['vassess'])){
-		$_SESSION['stud_result_criterial'] = explode("_", $_POST['vassess']); 
+		$_SESSION['stud_result_criterial'] = explode("-", $_POST['vassess']); 
 		header("Location:student_result.php"); 
 	}   
 ?>
@@ -173,15 +183,15 @@
 							 <select class="form-control" name="code" id="code" onChange="resemble()">
                                  <option value=""> Select.. </option>
                                    <?php  
-									foreach( $distcCode['code'] as $cc){
+									foreach( $distcCode['codegen'] as $cc){
 									?>
-                                   <option value="<?php echo $cc; ?>" <?php echo ($_SESSION['code']==$cc)?"selected":"";?>> <?php echo $cc; ?></option>
+                                   <option value="<?php echo $cc; ?>" <?php echo ($_SESSION['codegen']==$cc)?"selected":"";?>> <?php echo $cc; ?></option>
                                    <?php } ?>
                                </select>
                         </div> <!--/. form group-->
                     </div> <!--/. col-md-2 -->
                     
-                    <div class="col-md-2 col-sm-2 col-xs-6">                    
+                    <!-- <div class="col-md-2 col-sm-2 col-xs-6">                    
                     	<div class="form-group">
                         	<label>Filter By Type </label>
                    	      
@@ -195,7 +205,7 @@
                                </select>
 							   
                     	</div> <!--/. form group-->
-                    </div> <!--/. col-md-2 -->
+                    <!-- </div> <!--/. col-md-2 -->
                     
                     
                     <div class="col-md-1 col-sm-1 col-xs-3">                    	
@@ -205,7 +215,7 @@
                              </div> <!--/. form group-->
                     </div> <!--/. col-md-1 -->
                    
-                    
+					
 				  </form>
                     </div> <!--/. panel-body-->
                     </div> <!--/. panel info-->
@@ -218,15 +228,16 @@
 							
                             <div class="x_panel"> 
                                 <div class="x_title"> <form method="post">
-                                    <h2> <small style="font-size:14px;"> <b> Result For:  <?php echo $_SESSION['year']." | ". $_SESSION['code']." | ". $cosInfo['name'][0]." | ". $cosInfo['level'][0]." Level | ".$_SESSION['qtype'];?> &nbsp;</b> </small> 
-							 <?php if(!empty($_SESSION['year'])) { ?><button type="submit" name="downloadResult" id="downloadResult" class="btn btn-round btn-info"> Download &nbsp; <i class="fa fa-download"></i> </button> &nbsp; &nbsp; 
+                                    <h2> <small style="font-size:14px;"> <b> Result For:  <?php echo  $_SESSION['codegen']." | ";?> &nbsp;</b> </small> 
+							 <?php if(!empty($_SESSION['year'])) { ?><button type="submit" name="downloadResult" id="downloadResult" class="btn btn-round btn-info"> Download Excel &nbsp; <i class="fa fa-download"></i> </button> &nbsp; &nbsp; 
+							 <button type="submit" name="downloadSMS" id="downloadSMS" class="btn btn-round btn-success"> Download SMS &nbsp; <i class="fa fa-download"></i> </button> &nbsp; &nbsp;
 							 <button type="button" name="printResult" id="printResult" class="btn btn-round btn-primary" onclick="window.print()"> Print&nbsp; <i class="glyphicon glyphicon-print"></i> </button> <?php }?>
 									</h2>                                    
                                     <div class="clearfix"></div>
 									</form>
                                 </div>
                                 <div class="x_content">  <form method="post">									
-                                    <table class="table table-striped table-bordered responsive-utilities jambo_table" style="font-size:13px;">
+                                    <table id="resTable" class="table table-striped table-bordered responsive-utilities jambo_table" style="font-size:13px;">
                                         <thead>
                                             <tr  class="text-uppercase">
                                                  
@@ -260,7 +271,7 @@
                                             <td class="text-left text-capitalised"><button class="btn btn-primary btn-sm"> <?php echo $examStudents['totalmark'][$sn]; ?> </button></td>
 											 <td class="text-left"> <button class="btn btn-sm <?php echo $dbm->readPercent($examStudents['percent'][$sn]);?>"> <?php echo $examStudents['totalscore'][$sn];  ?> </button></td>
                                             <td class="text-left"> <button class="btn btn-sm <?php echo $dbm->readPercent($examStudents['percent'][$sn]);?>"> <?php echo  $examStudents['percent'][$sn];?></button>  </td>
-											<td class="text-left"><button  name="vassess" type="submit" value="<?php echo $uid."_".$examStudents['year'][$sn]."_".$examStudents['code'][$sn]."_".$examStudents['qtype'][$sn]; ?>" class="btn <?php if($examStudents['paper_signal'][$sn]=="normal") echo "btn-success"; if($examStudents['paper_signal'][$sn]=="process") echo "btn-warning"; if($examStudents['paper_signal'][$sn]=="done") echo "btn-primary";?> btn-sm" data-toggle="tooltip"  data-placement="top" title=" View Assessment  "><?php echo $examStudents['paper_signal'][$sn];?></button></td>                                            
+											<td class="text-left"><button  name="vassess" type="submit" value="<?php echo $uid."-".$examStudents['year'][$sn]."-".$examStudents['codegen'][$sn]; ?>" class="btn <?php if($examStudents['paper_signal'][$sn]=="normal") echo "btn-default"; if($examStudents['paper_signal'][$sn]=="process") echo "btn-warning"; if($examStudents['paper_signal'][$sn]=="done") echo "btn-success";?> btn-sm" data-toggle="tooltip"  data-placement="top" title=" View Assessment  "> <i class="fa fa-eye"></i>&nbsp; &nbsp; <?php echo $examStudents['paper_signal'][$sn];?>&nbsp; </button></td>                                            
                                         </tr> 
 							  <?php  $sn++; }
 							  
@@ -310,15 +321,18 @@
 	</div> <!-- /. container body -->
 	 
     <script> 
-	
+		
 		function resemble(){
 		$("#searchResult").click(); 
-	 }
+		}
 					
 	</script>
 		
 	<?php include "../media/links/foot_libraries.html"; ?>
-	  	
+	 
+     <script>
+     
+     </script> 	
         
             
      

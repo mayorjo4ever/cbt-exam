@@ -11,14 +11,14 @@
 	
 			public function __construct(){
 			
-			#$this->username = 'root';	$this->psw = 'msecure'; // connect to db 		
-		    $this->username = 'root';	$this->psw = ''; // connect to db 						
+			$this->username = 'root';	$this->psw = 'msecure'; // connect to db 		
+		    #$this->username = 'root';	$this->psw = ''; // connect to db 						
 							
 			try{
 				
 				if(!isset($_SESSION)) session_start();
 				
-				$this->conn = new PDO('mysql:host=127.0.0.1; dbname=kwcoetl_cbt',$this->username,$this->psw);
+				$this->conn = new PDO('mysql:host=127.0.0.1; dbname=nursingcbt',$this->username,$this->psw);
 				
 				$this->conn->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);			
 				$this->code = $this->conn->errorCode();
@@ -358,6 +358,103 @@
 		function toMD5($text){
 				return md5($text);
 		}
+	//////////////////
+		
+	/**************************************************************************/
+		public function resort(array $data){
+			
+			$ork = array_keys($data);  // original array keys 
+			$aVal = array(); $n = 0;  // array values 
+					foreach($data as $k=>$v){
+						$aVal[] = $data[$ork[$n]][0];
+						$n++;
+					}
+			return $output = array_combine($ork,$aVal);
+		}
+		/*********************************************************************/
+		############################
+		
+			
+	/****************************************************/
+	
+	# suffix of numbers or positions 
+	 function suffixes ($value){
+		if(!in_array(($value % 100),array(11,12,13))){
+			
+			switch ($value % 10){
+				case 1: return $value.'<sup>st</sup>';
+				case 2: return $value.'<sup>nd</sup>';
+				case 3: return $value.'<sup>rd</sup>';
+			}
+			
+		}
+			 return $value.'<sup>th</sup>';
+	 }
+	 /************************************************/
+	 // get week calendar range for a given year 
+		
+		function week_day_range($week,$year){
+			
+			$dto = new DateTime();
+			$res[0] = $dto->setISODate($year,$week)->format(' M d, Y');
+			$res[1] = $dto->modify('+5 days')->format(' M d, Y');
+			return $res; // result - array type 
+		}
+		/********************************************/
+		function get_month_days($month,$year){
+				return cal_days_in_month(CAL_GREGORIAN,$month,$year);		
+		}
+		/*******************************************/
+		function month_name($num){
+			$name = "";
+			switch($num){
+				
+				case 1 :  $name = "Jan"; break;
+				case 2 :  $name = "Feb"; break;
+				case 3 :  $name = "Mar"; break;
+				case 4 :  $name = "Apr"; break;
+				case 5 :  $name = "May"; break;
+				case 6 :  $name = "Jun"; break;
+				case 7 :  $name = "Jul"; break;
+				case 8 :  $name = "Aug"; break;
+				case 9 :  $name = "Sep"; break;
+				case 10 :  $name = "Oct"; break;
+				case 11 :  $name = "Nov"; break;
+				case 12 :  $name = "Dec"; break;				
+			}
+			return $name;
+		}
+		/********************************************/
+			function get_working_days($month,$year){
+				$totaldays = $this->get_month_days($month,$year);
+				$all_days = null; 
+				
+				for($d = $totaldays; $d>=1; $d--){
+					$dates = "".$month."/".$d."/".$year."";
+					if(date('D',strtotime($dates)) !="Sun"){
+						$all_days[] = $d;
+					}
+				}
+				
+				return $all_days; 
+			}
+			
+			/***************************************/
+			
+			function month_week_range($month,$year){
+				
+				 $days =  $this->get_month_days($month,$year);
+				 $beg = "".$month."/1/".$year;
+				 $end = "".$month."/".$days."/".$year;
+				
+				 $result[0] = (idate('W',strtotime($beg))==53)?1:idate('W',strtotime($beg));
+				 $result[1]= idate('W',strtotime($end));
+				 
+				 return $result; 
+			}
+			
+		
+		################
 	}
 	
 	?>

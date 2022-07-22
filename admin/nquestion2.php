@@ -658,7 +658,7 @@ $allQtns = $dbm->getFields($dbm->select("questions",array("year"=>$_SESSION['cos
 	<?php require "../media/links/top_libraries.html";?>
 
 	<!--include tinymce-->
-
+    
     <script type="text/javascript" src="../media/tinymce/tinymce.min.js"></script>
 	
 </head>
@@ -1130,11 +1130,8 @@ $allQtns = $dbm->getFields($dbm->select("questions",array("year"=>$_SESSION['cos
 		});
 	
 	</script>
-   
-	 
-	 
-	 
-	<?php include "../media/links/foot_libraries.html"; ?>
+ 
+ 	<?php include "../media/links/foot_libraries.html"; ?>
 	
      <script>
 
@@ -1161,8 +1158,7 @@ tinymce.init({
         {title: 'Table row 1', selector: 'tr', classes: 'tablerow1'}
     ]
  });
-
-	 //	alert(' i see you'); 
+ 
  
 tinymce.init({
     selector: "textarea#passage",
@@ -1187,8 +1183,10 @@ tinymce.init({
         {title: 'Table row 1', selector: 'tr', classes: 'tablerow1'}
     ]
  });
- //	alert('see me');
+ 
  </script>
+ 
+
  
 
 </body>

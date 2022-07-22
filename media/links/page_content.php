@@ -9,58 +9,68 @@
                     <div class="row tile_count">
                     
                    
-					 <div class="animated flipInY col-lg-3 col-md-3 col-sm-6 col-xs-12">
+					 <div class="animated flipInY col-lg-3 bg-success col-md-3 col-sm-6 col-xs-12">
                             <div class="tile-stats">
                                 <div class="icon"><i class="fa fa-users"></i>
                                 </div>
                                 <div class="count"> <label id="totuser"></label> </div>
 
                                 <h3> <a href="contacts.php"> Total Users  </a> </h3>
-                                <p> overall users available </p>
+                                <p class="pull-right"> more..&nbsp; &nbsp;</p>
                             </div>
                         </div> 
 						
-						<div class="animated flipInY  col-md-3 col-sm-6 col-xs-12">
+						<!--<div class="animated flipInY  col-md-3 bg-info col-sm-6 col-xs-12">
                             <div class="tile-stats">
                                 <div class="icon"><i class="glyphicon glyphicon-import"></i>
                                 </div>
-                                <div class="count" id="totLoan"> <i class="fa fa-users"></i> </div>
+                                <div class="count" id="totLoan"> &infin; 1000  </div>
 
                                 <h3> <a href="newcontacts.php"> Import Users </a> </h3>
-                                <p> add / create new more users </p>
+                                <p class="pull-right"> more..&nbsp; &nbsp;</p>
                             </div>
-                        </div> 
+                        </div> -->
 						
 						
-					 <div class="animated flipInY col-md-3 col-sm-6 col-xs-12">
+					 <div class="animated flipInY col-md-3 bg-success col-sm-6 col-xs-12">
                             <div class="tile-stats">
                                 <div class="icon"><i class="fa fa-laptop fa-fw"></i>
                                 </div>
                                 <div class="count"> <label id="totcos"></label> </div>
 
-                                <h3> <a href="allquestion.php"> Ready Exams  </a> </h3>
-                                <p> course whoose questions are ready .</p>
+                                <h3> <a href="allquestion.php"> View Questions  </a> </h3>
+                                <p class="pull-right"> more..&nbsp; &nbsp;</p>
                             </div>
                         </div> 
 						
-						<div class="animated flipInY  col-md-3 col-sm-6 col-xs-12">
+						<div class="animated flipInY  bg-success col-md-3 col-sm-6 col-xs-12">
                             <div class="tile-stats">
                                 <div class="icon"><i class="fa fa-book"></i>
                                 </div>
                                 <div class="count" id="totLoan"> <label id="totqtn"></label> </div>
 
                                 <h3> <a href="userscourses.php"> All courses </a> </h3>
-                                <p> comments.</p>
+                                <p class="pull-right"> more..&nbsp; &nbsp;</p>
                             </div>
                         </div> 
 					
+                     <div class="animated flipInY col-md-3 bg-success col-sm-6 col-xs-12">
+                            <div class="tile-stats">
+                                <div class="icon"><i class="fa fa-cogs fa-fw"></i>
+                                </div>
+                                <div class="count"> <label id="#"> 3</label> </div>
+
+                                <h3> <a href="esettings.php">  Schedule Exam </a> </h3>
+                                <p class="pull-right"> more..&nbsp; &nbsp;</p>
+                            </div>
+                        </div> 
                    
                     </div> <!-- /. row -->
                
 			 
                <div class="row">
                	
-                	<div class="col-md-8 col-sm-8 col-xs-12">
+                	<div class="col-md-8 col-sm-8 col-xs-12 bg-success">
 							
 					<div class="col-md-12 col-sm-12 col-xs-12">
                         <div class="x_panel">

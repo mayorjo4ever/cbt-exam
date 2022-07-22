@@ -2,6 +2,9 @@
 	  
 	if(!isset($_SESSION)) session_start();
 	
+	
+	
+	
 	class DbTool{
 		
 			public $username,$psw,$conn;
@@ -11,13 +14,14 @@
 	
 			public function __construct(){
 			
-			  $this->username = 'root';	$this->psw = ''; 
+			$this->username = 'root';	$this->psw = ''; // connect to db 		
+		    #$this->username = 'root';	$this->psw = ''; // connect to db 						
 							
 			try{
 				
 				if(!isset($_SESSION)) session_start();
 				
-				$this->conn = new PDO('mysql:host=127.0.0.1; dbname=cbt_exam',$this->username,$this->psw);
+				$this->conn = new PDO('mysql:host=127.0.0.1; dbname=nursingcbt',$this->username,$this->psw);
 				
 				$this->conn->setAttribute(PDO::ATTR_ERRMODE,PDO::ERRMODE_EXCEPTION);			
 				$this->code = $this->conn->errorCode();
@@ -170,7 +174,100 @@
 		 
 	   }
 		#			
+		  public function select($table, $where="",$order="", $operator = "AND", $direction = " DESC "){
+			 
+			 try{
+	   	 			$db = new DbTool();	$conn = $db->getConn();
+		  $wheres = empty($where)?"":array_map(function($elem){ return "$elem = ?";},array_keys($where));
+			
+			if(!empty($order)) $ord = " ORDER BY ".join(" , ",$order)." ". $direction ;
+			else $ord = "";		
+			
+		  $str = sprintf("SELECT * FROM %s %s %s %s ",$table,empty($where)?"":"WHERE",join(" $operator ",$wheres),$ord);
 		  
+		  $stm = $conn->prepare($str);
+ 		
+			$stm->execute(array_values($where));
+			
+		 $this->message = $stm->rowCount()." record(s) found";
+		 $this->code = $stm->errorCode();
+		 $this->status = true; 
+			
+			$stm->setFetchMode(PDO::FETCH_ASSOC);
+						
+			return $res = $stm->fetchAll();
+			
+			 }
+			 catch(PDOException $er){
+					$this->code = $_SESSION['error_code'] = $er->getCode(); 
+					$this->message = $_SESSION['error_msg'] = $er->getMessage(); 
+					header("Location:error_page/");
+			 }
+		  }
+		  #
+		  /****************************************************************************/
+		  //////////////////////////////////////////////////////////////////////////////
+		  // selection function with different equators < > = <= >= 
+		   
+	  function selections($table, $wheres, $whereEqt, $operators, $order="",  $direction = " DESC "){
+			  
+			  try{
+				  
+				  $db = new DbTool();	$conn = $db->getConn();
+				
+				$cw = count($wheres); $ce = count($whereEqt); $co = count($operators);
+				  if($cw!= $ce)
+					  throw new Exception(" The total numbers of Whereclause must matched with the numbers of WhereEquator : ".$cw." by ".$ce." by ".$co." given ");
+					 
+					 if(($cw-1)!= $co)
+					  throw new Exception(" The total numbers of operators ( OR AND, NOR ) must be 1 less than the  WhereEquator : ".$cw." by ".$ce." by ".$co." given ");
+				  
+					$whereSql = '';	 				  
+							if(!empty($wheres)){			
+								# split array
+									$i = 0; 									
+									foreach($wheres as $column=>$value){
+										$strings[] =  $column." ".$whereEqt[$i]." '".$value."'";
+										$i++;
+										}
+										// match string with operators
+										$data = [];
+										 foreach(array_map(null,$strings,$operators) as $parts)
+										 {
+											 $data = array_merge($data,$parts);
+										 }
+										 /* alternative code
+										 /*********************************** 
+										 $data = array_reduce(array_map(null,$strings,$operators),
+										 function($strings,$operators){
+												return array_merge($strings,$operators);
+											},array());
+										****************************************/
+										 $whereSql = implode(" ",$data);
+										}
+			  
+			if(!empty($order)) $ord = " ORDER BY ".join(" , ",$order)." ". $direction ;
+				else $ord = "";		
+			
+			$str = sprintf("SELECT * FROM %s %s %s %s ",$table,empty($wheres)?"":" WHERE ",$whereSql,$ord);
+		  
+			$stm = $conn->prepare($str);
+			
+			$stm->execute();									
+				 $this->message = $stm->rowCount()." record(s) found";
+				 $this->code = $stm->errorCode();
+				 $this->status = true; 											
+					$stm->setFetchMode(PDO::FETCH_ASSOC);							
+						return $res = $stm->fetchAll();
+								
+			  }
+			  catch(Exception $e){
+				  echo $e;
+			  }
+			  
+			 }
+		   
+		   /************************
 		public function select($table,array $where,$order="", $operator = "AND"){
 			 
 			 try{
@@ -205,7 +302,33 @@
 		  }
 		  #
 		 
-		  #		   
+		  ****************/  
+		  
+		  // old multi distinct function 
+		  function multiDistinct(array $field,$table,array $where,$order=""){
+			 try{
+	   	  $con = new DbTool();	$conn = $con->getConn(); 
+
+//		  $field = empty($field)?"*":array_map(function($elem){ return "$elem,";},array_keys($field));//
+		  $wheres = empty($where)?"":array_map(function($elem){ return "$elem = ?";},array_keys($where));
+			
+			if(!empty($order)) $ord = " ORDER BY ".$order[0];
+			else $ord = "";		
+			
+		 $str = sprintf("SELECT DISTINCT %s FROM %s %s %s %s",join(", ",$field),$table,empty($where)?"":"WHERE",join(' AND ',$wheres),$ord);
+		 
+		  $stm = $conn->prepare($str);
+ 		
+			$stm->execute(array_values($where));
+			
+			return $res = $stm->fetchAll();
+			 
+			 }
+			 catch(PDOException $er){
+					echo $er->getMessage(); 
+			 }
+		  }
+		 //////////////////////////
 		  
 		public function select_Distinct($field,$table,array $where,$order="", $operator = "AND"){
 			 
@@ -241,15 +364,15 @@
 				 }
 		  }
 		  #
-						
-		public function select_Multi_Distinct(array $field,$table,array $where,$order="", $operator = "AND"){
+		
+		public function select_Multi_Distinct(array $field,$table,array $where,$order="", $operator = "AND", $direction = "DESC"){
 			 try{
 	   	  $db = new DbTool();	$conn = $db->getConn(); 
 
- 		  // $fields = empty($field)?"*":array_map(function($elem){ return "$elem,";},array_keys($field));//
+//		  $field = empty($field)?"*":array_map(function($elem){ return "$elem,";},array_keys($field));//
 		  $wheres = empty($where)?"":array_map(function($elem){ return "$elem = ?";},array_keys($where));
 			
-			if(!empty($order)) $ord = " ORDER BY ".$order[0];
+			if(!empty($order)) $ord = " ORDER BY ".join(" , ",$order)." ". $direction ;
 			else $ord = "";		
 			
 		 $str = sprintf("SELECT DISTINCT %s FROM %s %s %s %s",join(", ",$field),$table,empty($where)?"":"WHERE",join(" $operator ",$wheres),$ord);
@@ -275,6 +398,7 @@
 		  }
 		  		  
 		 ##
+		
 		
 		public function getMax($table, $field, $wheres, $operator = "AND"){
 			
@@ -533,7 +657,18 @@
 		return $str; 
 	}
 	
-	
+	/**************************************************************************/
+		public function resort(array $data){
+			
+			$ork = array_keys($data);  // original array keys 
+			$aVal = array(); $n = 0;  // array values 
+					foreach($data as $k=>$v){
+						$aVal[] = $data[$ork[$n]][0];
+						$n++;
+					}
+			return $output = array_combine($ork,$aVal);
+		}
+		/*********************************************************************/
 	
 	/********************************************************************************/
 		public function submitQuestion(){							
@@ -545,6 +680,7 @@
 					$savingData = array("code"=>$_SESSION['coscode'],"year"=>$_SESSION['cosyear'],
 					"qtype"=>$_SESSION['questype'],"level"=>$_SESSION['level'],"num"=>$_SESSION['qtnNo'],
 					"passage"=>($_SESSION['psgInc']=="")?"":$_SESSION['passage'],"question"=>$_SESSION['question'],
+					"instruction"=>($_SESSION['instruct_option']=="yes")?$_SESSION['instruct_passage']:"",
 					"optiontype"=>$_SESSION['optionType'],"option1"=>$_SESSION['options'][1],
 					"option2"=>$_SESSION['options'][2],"option3"=>$_SESSION['options'][3],
 					"option4"=>$_SESSION['options'][4],"option5"=>$_SESSION['options'][5],"marks"=>$_SESSION['marks'],
@@ -556,6 +692,7 @@
 					$updData = array("code"=>$_SESSION['coscode'],"year"=>$_SESSION['cosyear'],
 					"qtype"=>$_SESSION['questype'],"level"=>$_SESSION['level'],"num"=>$_SESSION['qtnNo'],
 					"passage"=>($_SESSION['psgInc']=="")?"":$_SESSION['passage'],"question"=>$_SESSION['question'],
+					"instruction"=>($_SESSION['instruct_option']=="yes")?$_SESSION['instruct_passage']:"",
 					"optiontype"=>$_SESSION['optionType'],"option1"=>$_SESSION['options'][1],
 					"option2"=>$_SESSION['options'][2],"option3"=>$_SESSION['options'][3],
 					"option4"=>$_SESSION['options'][4],"option5"=>$_SESSION['options'][5],"marks"=>$_SESSION['marks'],
@@ -573,7 +710,7 @@
 							$_SESSION['display'] = $display = $disp_on;
 							$_SESSION['msgAlert'] = $msgAlert = $asuccess;
 							
-					 $_SESSION['qtnMsg'] = " Question ". $_SESSION['qtnNo']. " Successfully saved.. ";
+					 $_SESSION['qtnMsg'] = " Question ". $_SESSION['qtnNo']. " Successfully saved.. Press New Question";
 					 $_SESSION['saveNewQtn'] = "yes";
 				} // end for insert 
 				

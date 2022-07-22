@@ -171,11 +171,13 @@
 							
 						req.done(function(msg){
 							$("#examHallUsers").html(msg);
+							// alert('working');
 						});
 			  
 		  }
 		  
-
+	
+	window.setInterval(fetchExmUsers,1000);
 			
 			 
 	</script>

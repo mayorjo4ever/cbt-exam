@@ -6,7 +6,7 @@
 
 					<!-- bank logo and short name  -->
                     <div class="navbar nav_title" style="border: 0;">
-                        <a href="index.php" class="site_title"> <img src="../media/images/laflogo.png" class="img img-circle" style="max-height:50px;"/>
+                        <a href="index.php" class="site_title"> <img src="<?php echo '../media/images/'.$bi->logo; ?>" class="img img-circle img-thumbnail" style="max-height:50px;"/>
 						<span><?php   echo $bi->shortname; ?></span></a>
                     </div>
 					
@@ -38,14 +38,17 @@
                                     <ul class="nav child_menu" style="display: none">
                                         <li> <a href="contacts.php"> <i class="fa fa-user fa-fw"></i> View All Users </a>
                                         </li>
-                                          <li> <a href="contacts.php"> <i class="glyphicon glyphicon-import fa-fw"></i> Import Users </a>
+                                          <li> <a href="newcontacts.php"> <i class="glyphicon glyphicon-import fa-fw"></i> Import Users </a>
+                                        </li>
+										<li> <a href="onlineusers.php"> <i class="glyphicon glyphicon-import fa-fw"></i> Examiners </a>
                                         </li>
                                          
+										 
                                         
                                        </ul>  
                                 </li>
                       <!--Course   menu     -->                       
-                                 <li><a> <i class="fa fa-book fa-fw"></i> Courses Offer <span class="fa fa-chevron-down"></span></a>
+                                 <li><a> <i class="fa fa-book fa-fw"></i> Courses  <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">                                         
                                         <li><a href="courses.php">  <i class="fa fa-eye"></i>  View / Create Courses  </a>
                                         </li>                                       
@@ -69,7 +72,7 @@
 								
 								<li><a> <i class="fa fa-cogs"> </i> Exam Schedule <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">
-                                        <li> <a href="student_schedule.php"> <i class="fa fa-users fa-fw"></i> Student Schedule </a>
+                                        <li> <a href="esettings.php"> <i class="fa fa-users fa-fw"></i> Exam Settings </a>
                                         </li>
                                         <li> <a href="commencement.php"> <i class="fa fa-laptop fa-fw"></i>  Commencement   </a>
                                         </li>
@@ -80,8 +83,6 @@
 					 <!-- Report  menu     -->                       
                                  <li><a> <i class="fa fa-book fa-fw"></i> Reports <span class="fa fa-chevron-down"></span></a>
                                     <ul class="nav child_menu" style="display: none">                                         
-                                        <li><a href="result.php"> <i class="fa fa-table"></i>  Print Attendance Sheet </a>
-                                        </li> 
 										<li><a href="result.php"> <i class="fa fa-table"></i>  View Result </a>
                                         </li> 										
                                         </ul>

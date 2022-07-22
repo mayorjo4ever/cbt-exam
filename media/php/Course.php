@@ -1,6 +1,6 @@
 <?php 	
 	
-	// require "dbTool.php";
+	require_once "dbTool.php";
 	
 		class Course{
 				
@@ -38,7 +38,7 @@
 				public function getAll(array $criteral){ 
 					 
 				 	$dbm = new DbTool(); 						
- 				 	$allCourse = $dbm->getFields($dbm->select('courses',$criteral,array('level')),
+ 				 	$allCourse = $dbm->getFields($dbm->select('courses',$criteral,array('level','semester','name')),
 	 		array('sn','name','code','unit','status','level','semester')); 						
 						return $allCourse;						
 					} 

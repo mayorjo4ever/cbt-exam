@@ -184,35 +184,29 @@
 		
 		if(isset($_POST['completedCos'])){
 			$dbm = new DbTool(); 
-			$datas = explode("_",$_POST['completedCos']); 
-			# 0 = title // 1 = cos code // 2 = type // 3 = year 
+			$datas = explode("-",$_POST['completedCos']); 
+			# 0 = title // 1 = cos code // 2  = year 
 			# check database if existed 
-			 $completed = $dbm->getFields($dbm->select("course_schedule",array(
-				"code"=>$datas[1],
-				"qtype"=>$datas[2],
-				"year"=>$datas[3],
+			 $completed = $dbm->getFields($dbm->select("epanel",array(
+				"codegen"=>$datas[1],
+				"year"=>$datas[2],
 				"state"=>"done")),
-				array("code","year","qtype"));
+				array("codegen","year","state"));
 				// when existed 
-			if(count($completed['code'])==0){
+			if(count($completed['codegen'])==0){
 				// now close the course 
-				$dbm->updateTb("course_schedule",
-						array(
-						"code"=>$datas[1],
-						"qtype"=>$datas[2],
-						"year"=>$datas[3],
+				$dbm->updateTb("epanel",
+						array(						
 						"state"=>"done"),
 						array(
-						"code"=>$datas[1],
-						"qtype"=>$datas[2],
-						"year"=>$datas[3],
-						"state"=>"ready"));
+						"codegen"=>$datas[1],						
+						"year"=>$datas[2]));
 				
 			 echo $datas[1]." is now Closed for students "; 
 				
 			}
 			
-			else if(count($completed['code'])==1){
+			else if(count($completed['codegen'])==1){
 				echo $datas[1]." has already been Closed earlier ";
 			}
 		}
@@ -233,29 +227,39 @@
 	 if(!isset($_SESSION['time_start'])) $_SESSION['time_start'] = time();
 	
 		$_SESSION['time_used'] = (time() - $_SESSION['time_start']) + $_SESSION['init_sec_used'];
-	
 	/******************* update The result ***********************/
 	 $dbm->updateTb("users_result",array("bus_stop"=>$_SESSION['qtnNo'],"sec_used"=>$_SESSION['time_used'],
 	 "totalmark"=>$_SESSION['totalmark'],
 	 "totalscore"=>array_sum($_SESSION['myScore']),"unitscore"=>$_SESSION['unitScore'],"percent"=>$_SESSION['percent']),
-		array("user_id"=>$_SESSION['exmUser'],"year"=>$_SESSION['year'],"code"=>$_SESSION['code'],
-	"qtype"=>$_SESSION['qtype']));
+		array("user_id"=>$_SESSION['exmUser'],"year"=>$_SESSION['year'],"codegen"=>$_SESSION['codegen']));
 	/*************************************************************************************/
-		
-		//  save questions as well 
-		/****************************************************/
-		  for($i=1; $i<=$_SESSION['tot_qtn']; $i++){	
-			
-			$dbm->updateTb("qtn_remind",
-			array("picked1"=>$_SESSION['picked1'.$i]),
-			array("user_id"=>$_SESSION['exmUser'],"year"=>$_SESSION['year'],"code"=>$_SESSION['code'],"qtype"=>$_SESSION['qtype'],"num"=>$i));
-				
-		 }
-	// all answer picked are saved now 
+	
 		if($_SESSION['time_used']>=$_SESSION['total_sec']) $_SESSION['paperFinished'] = true; 
 	 	/**** notify if timeout *****/		 
 		echo ($_SESSION['time_used']>=$_SESSION['total_sec'])?true:false;
 	
+		
+	}
+
+
+	if(isset($_POST['updateWatches'])) {
+		
+
+		
+		#######################################################################################
+		 
+		//  save questions as well 
+		/**********************************************
+		  for($i=1; $i<=$_SESSION['tot_qtn']; $i++){	
+		   
+			$dbm->updateTb("qtn_remind",
+			array("picked1"=>$_SESSION['picked1'.$i]),
+			array("user_id"=>$_SESSION['exmUser'],"year"=>$_SESSION['year'],"codegen"=>$_SESSION['codegen'],"num"=>$i));
+				
+		 } **/
+		 
+	// all answer picked are saved now 
+		
 	}
 
 /**************************************************/

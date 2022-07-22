@@ -27,7 +27,7 @@
 		
 	if(isset($_POST['searchCos'])){
 				
-			$_SESSION['courseYear'] = $_POST['courseYear'];
+			$_SESSION['scheduleYear'] = $_POST['scheduleYear'];
 			
 	}
 /*****************************************************************/	
@@ -36,8 +36,8 @@
 	
 	$dbm = new DbTool(); # (array $field,$table,array $where,$order="", $operator = "AND"){
 
-	$readyCos =$dbm->getFields($dbm->select_Multi_Distinct(
-		array("code","qtype","year"),"users_result",array("year"=>$_SESSION['courseYear'])),array("code","qtype","year"));	
+	$readyCos = $dbm->getFields($dbm->select_Multi_Distinct(
+		array("codegen","year"),"users_result",array("year"=>$_SESSION['scheduleYear'])),array("codegen","title","year"));	
 
 		
 		
@@ -51,9 +51,9 @@
 		 
 			for($j=0; $j < $dels; $j++)
 				{
-					$criterial  = explode("_",$_POST['cosSchd'][$j]);  // code qtype and year
+					$criterial  = explode("-",$_POST['cosSchd'][$j]);  // codegen and year
 					
-					$dbm->deleteRow("course_schedule",array("code"=>$criterial[0],"qtype"=>$criterial[1],"year"=>$criterial[2]));
+					$dbm->updateTb("epanel",array('state'=>'draft'),array("codegen"=>$criterial[0],"year"=>$criterial[1]));
 				}
 				//  deleted 
 		
@@ -64,6 +64,16 @@
 
 	}
 				
+########################################################################################
+########################################################################################
+## access_students 
+		if(isset($_POST['access_students'])){
+			$data = $_POST['access_students'];
+			$infos = explode("-",$data); 
+			$_SESSION['codegen']=$infos[0]; $_SESSION['year']=$infos[1];
+			header("Location:result.php");
+		
+		}
  
 ?>
 <!DOCTYPE html>
@@ -99,7 +109,7 @@
                 <div class="">
                     <div class="page-title">
                         <div class="title_left"> <form method="post">
-                            <h3> <i class="fa fa-book fa-fw"> </i> &nbsp; Assessment Schedule  <small> For Students  </small> &nbsp; <button class="btn btn-round btn-primary" name="cosplus"  id="cosplus"type="submit" title=" ...  "><i class="fa fa-wrench"> </i></button>
+                            <h3> <i class="fa fa-book fa-fw"> </i> &nbsp; Assessment Schedule  <small> For Students  </small> &nbsp; <button class="btn btn-round btn-primary" name="cosplus"  id="cosplus"type="submit" title=" Click here to select year  "><i class="fa fa-repeat"> </i></button>
                 </h3>
                 </form>
                         </div>
@@ -132,11 +142,11 @@
 					 <div class="col-md-3 col-sm-3 col-xs-6">                    
                     	<div class="form-group">
                         	<label>  Filter Courses By Year  </label>
-                        	<select class="form-control select" name="courseYear" id="courseYear">									
+                        	<select class="form-control select" name="scheduleYear" id="scheduleYear">									
 									
 									<optgroup label="Year ">
 									<?php for($year = 2015; $year <= date('Y'); $year++) {?> 
-                                    	<option value="<?php echo $year; ?>" <?php echo ($_SESSION['courseYear']==$year)?"selected":""?>> <?php echo $year;  ?> </option>
+                                    	<option value="<?php echo $year; ?>" <?php echo ($_SESSION['scheduleYear']==$year)?"selected":""?>> <?php echo $year;  ?> </option>
                                      <?php }?>
                                     </optgroup>
                                     
@@ -189,64 +199,79 @@
                                                 <th> S/N </th>
                                                 <th> Course Code </th>
                                                 <th> Course Name </th>
-												<th> Type </th>
-                                                <th> Level </th>
-                                                <th> Total Students  </th>
-                                                <th> Paper On schedule  </th>   
+												<th> Total Students  </th>
+                                                <th> Paper has Started  </th>   
                                                 <th> Paper Completed </th>                                               
                                             </tr>
                                         </thead>
 									<!-- now list all courses available or searched -->
                                         <tbody>
+										
                                              <?php $sn = 0; 
-									foreach($readyCos['code'] as $coscode ){  
-										$courses = new Course();   $cosInfo = $courses->getAll(array("code"=>$coscode));
+											 
+											 if(!is_null($readyCos)) { ?>
+											 
+											 <tr> 
+												 <td> * </td>
+												 <td colspan="6"> Click the <b>OFF/ON</b> button to change the state of the paper schedules  &nbsp; &nbsp;&nbsp; <b>OFF</b> means No, &nbsp; &nbsp; <b>ON</b> means Yes. </td>
+											</tr>
+										<?php
+											 
+									foreach($readyCos['codegen'] as $coscode ){  
+										// $courses = new Course();   $cosInfo = $courses->getAll(array("code"=>$coscode));
 										// fetch all students
-										$allStuds = $dbm->getFields($dbm->select("users_result",array("code"=>$readyCos['code'][$sn],"qtype"=>$readyCos['qtype'][$sn],"year"=>$readyCos['year'][$sn])),array('user_id'));
+										$allStuds = $dbm->getFields($dbm->select("users_result",array("codegen
+										"=>$readyCos['codegen'][$sn] ,"year"=>$readyCos['year'][$sn])),array('user_id'));
+										
+										$costitle = $dbm->getFields($dbm->select("epanel",array("codegen
+										"=>$readyCos['codegen'][$sn])),array('title','state'));
 										
 										// query if course has already been scheduled 
-										$scheduled = $dbm->getFields($dbm->select("course_schedule",array(
-										"code"=>$coscode,
-										"qtype"=>$readyCos['qtype'][$sn],
+										$scheduledCos = $dbm->getFields($dbm->select("epanel",array(
+										"codegen"=>$coscode,										
 										"year"=>$readyCos['year'][$sn])),
-										array("code","year","qtype"));
+										array("codegen","year","title","state"));
 										
 										// completed course 
-										$completedCos = $dbm->getFields($dbm->select("course_schedule",array(
-										"code"=>$coscode,
-										"qtype"=>$readyCos['qtype'][$sn],
+										$completedCos = $dbm->getFields($dbm->select("epanel",array(
+										"codegen"=>$coscode,										
 										"year"=>$readyCos['year'][$sn],
 										"state"=>"done")),
-										array("code","year","qtype"));
+										array("codegen","year","title","state"));
 									?>	
                                             <tr class="odd pointer">
                                                 <td class="a-center ">
-                                                    <input type="checkbox" class="cosSchd tableflat" name="cosSchd[]" value="<?php echo $readyCos['code'][$sn]."_".$readyCos['qtype'][$sn]."_".$_SESSION['courseYear'];  ?>">
+                                                    <input type="checkbox" class="cosSchd tableflat" name="cosSchd[]" value="<?php echo $readyCos['codegen'][$sn]."-".$readyCos['year'][$sn];  ?>">
                                                 </td>
                                                 <td class=" "><?php echo $sn+1; ?> </td>
                                                 <td class=" "><?php echo  $coscode; ?>  </td>												
-                                                <td class=" "><?php echo $cosInfo['name'][0];  ?> </td>
-												<td class=" "><?php echo  $readyCos['qtype'][$sn]; ?>  </td>
-												<td class=" "> <button type="button" class="btn btn-success btn-sm" title="Course Level "> <?php echo $cosInfo['level'][0];  ?>  </button> </td>
-                                                <td class=" "><button type="button" class="btn btn-info btn-sm" title=" Total Students  "> <?php echo count($allStuds['user_id']);  ?>  </button></td>
+                                                <td class=" "><?php echo $costitle['title'][0];  ?> </td>
+                                                <td class=" "><button type="submit" name="access_students" value="<?php echo $coscode."-".$readyCos['year'][$sn]; ?>"  class="btn btn-info btn-sm" title=" Total Students"> View All &nbsp;  <i class="badge"> <?php echo count($allStuds['user_id']);  ?>  &nbsp; </i>  </button></td>
                                                 <td>
 													<div class="">
 													  <label>
-														 <input class="schedule-state" type="checkbox" value="<?php echo "schedule_".$coscode."_".$readyCos['qtype'][$sn]."_".$readyCos['year'][$sn];?>" <?php echo (count($scheduled['code'])==1)?"checked":""?>>
+														 <input class="schedule-state" type="checkbox" value="<?php echo "schedule-".$coscode."-".$readyCos['year'][$sn];?>" <?php if(count($scheduledCos['state'])>0 && $scheduledCos['state'][0]!="draft") echo "checked";?>>
 													  </label>
 													</div>
-
- 
 												</td>
                                                 <td>
 													<div class="">
 													  <label>
-														 <input class="complete-state" type="checkbox" value="<?php echo "complete_".$coscode."_".$readyCos['qtype'][$sn]."_".$readyCos['year'][$sn];?>" <?php echo (count($completedCos['code'])==1)?"checked":""?>>
+														 <input class="complete-state" type="checkbox" value="<?php echo "complete-".$coscode."-".$readyCos['year'][$sn];?>" <?php echo (count($completedCos['state'])==1)?"checked":""?>>
 													  </label>
 													</div>
 												</td>                                      
                                             </tr> 
-                                            <?php $sn++; } ?>
+                                            <?php $sn++; } 
+											 } // end not null 											
+
+											else { ?>
+											
+											<tr> <th colspan="7" class="no-data center"> Seems No Paper has been scheduled for students   </th> </tr>
+												
+											<?php }
+											
+											?>
                                       
                                         </tbody>
                                     </table>
@@ -322,7 +347,7 @@
 			
 						req2.done(function(d){
 							
-							 alert(d); 
+							 alert($.trim(d)); 
 							 top.location.href = "";
 						});
 						
@@ -353,14 +378,14 @@
 			
 						req.done(function(d){
 							
-							 alert(d); 
+							 alert($.trim(d)); 
 							 top.location.href = "";
 						});
 					
 			});
 			 
 			/**********************************************************************/
-			$('#courseYear').on('change',function(){
+			$('#scheduleYear').on('change',function(){
 				$('#searchCos').click();
 				
 				});

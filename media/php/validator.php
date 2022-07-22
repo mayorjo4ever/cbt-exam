@@ -187,34 +187,30 @@
 		 
 	  }
 		
-		
-		
 	/*****************************************************************/
 		// scheduling courses for students 
 		
 		if(isset($_POST['scheduleCos'])){
 			$dbm = new DbTool(); 
-			$datas = explode("_",$_POST['scheduleCos']); 
-			# 0 = title // 1 = cos code // 2 = type // 3 = year 
+			$datas = explode("-",$_POST['scheduleCos']); 
+			# 0 = title // 1 = cos code // 2  = year 
 			# check database if existed 
-			 $scheduled = $dbm->getFields($dbm->select("course_schedule",array(
-				"code"=>$datas[1],
-				"qtype"=>$datas[2],
-				"year"=>$datas[3])),
-				array("code","year","qtype"));
+			 $scheduled = $dbm->getFields($dbm->select("epanel",array(
+				"codegen"=>$datas[1],			
+				"year"=>$datas[2],
+				"state"=>"draft")),
+				array("codegen","year","state"));
 				// when existed 
-			if(count($scheduled['code'])==0){
+			if(count($scheduled['codegen'])==1){
 				// now schedule the course 
-				$dbm->insert("course_schedule",array(
-						"code"=>$datas[1],
-						"qtype"=>$datas[2],
-						"year"=>$datas[3],
-						"state"=>"ready"));
+				$dbm->updateTb("epanel",array(						
+						"state"=>"ready"),array("codegen"=>$datas[1],			
+							"year"=>$datas[2],"state"=>"draft"));
 				
 			 echo $datas[1]." is now scheduled for students "; 
 				
 			}
-			else if(count($scheduled['code'])>0){
+			else if(count($scheduled['code'])==0){
 				echo $datas[1]." has already been scheduled earlier ";
 			}
 		}

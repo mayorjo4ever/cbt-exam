@@ -218,7 +218,7 @@
                 <div class="">
                     <div class="page-title">
                         <div class="title_left"> <form method="post">
-                            <h3> <i class="fa fa-book fa-fw"> </i> &nbsp; Courses  <?php echo "(". count($allCourses['code']).")&nbsp;";  ?>  <small> Available </small> &nbsp; <button class="btn btn-round btn-primary" name="cosplus"  id="cosplus"type="submit" title="Create New Course "><i class="fa fa-pencil"> </i></button>
+                            <h3> <i class="fa fa-book fa-fw"> </i> &nbsp; Courses  <?php echo "(". count($allCourses['code']).")&nbsp;";  ?>  <small> Available </small> &nbsp; <button class="btn btn-round btn-primary" name="cosplus"  id="cosplus"type="submit" title="Create New Course "><i class="fa fa-plus"> </i></button>
                 </h3>
                 </form>
                         </div>
@@ -297,7 +297,7 @@
                     <?php if(isset($_SESSION['CosUpdates'])){ ?>
                     <div class="col-md-2 col-sm-2 col-xs-3">                    	
                     	<div class="form-group">                        
-                        	<button class="btn btn-info" type="submit" name="updCos" id="updCos" title=" Update Course">Update Course <i class="fa fa-send"></i> </button>
+                        	<button class="btn btn-warning" type="submit" name="updCos" id="updCos" title=" Update Course">Update Course <i class="fa fa-send"></i> </button>
                              </div> <!--/. form group-->
                     </div> <!--/. col-md-1 -->
                     <?php }?>
@@ -305,14 +305,14 @@
                     <?php if(isset($_SESSION['newCos'])){ ?>
                     <div class="col-md-2 col-sm-2 col-xs-3">                    	
                     	<div class="form-group">                        	
-                        	<button class="btn btn-success" type="submit" name="createCos" id="createCos" title="Create Course"> Create Course <i class="fa fa-send"></i> </button>
+                        	<button class="btn btn-primary" type="submit" name="createCos" id="createCos" title="Create Course"> Save &nbsp; <i class="fa fa-plus-circle"></i> &nbsp; </button>
                              </div> <!--/. form group-->
                     </div> <!--/. col-md-1 -->
                     <?php }?>
                     
                         <div class="col-md-2 col-sm-2 col-xs-3">                    	
                     	<div class="form-group">
-                            <button class="btn btn-danger" type="submit" name="canCos" id="canCos" title="Cancel"> Cancel <i class="fa fa-remove"></i> </button>
+                            <button class="btn btn-danger" type="submit" name="canCos" id="canCos" title="Cancel"> Cancel &nbsp; <i class="fa fa-remove"></i> &nbsp; </button>
                         	
                         </div> <!--/. form group-->
                     </div> <!--/. col-md-1 -->
