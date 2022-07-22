@@ -11,7 +11,8 @@
 	
 			public function __construct(){
 			
-			  $this->username = 'root';	$this->psw = ''; 
+			# $this->username = 'root';	$this->psw = 'msecure'; // connect to db 		
+		     $this->username = 'root';	$this->psw = ''; // connect to db 						
 							
 			try{
 				

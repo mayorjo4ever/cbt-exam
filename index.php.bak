@@ -16,7 +16,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 	
     
-    <title> ONLINE COMPUTER BASED TEST </title>    
+    <title> Kwara State College of Education Technology | Lafiagi </title>    
 	
 	<link href="media/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="media/css/custom.css" rel="stylesheet"/>
@@ -44,7 +44,7 @@
                     <div class="panel panel-info text-center">
                         <div class="panel-heading black">
 						  <h3>  <img src="media/images/laflogo.png" style="max-height:60px; max-width:120px;" /> &nbsp; 
-						  <b>    ONLINE COMPUTER BASED TEST </b> 
+						  <b>    KWARA  STATE COLLEGE OF  EDUCATION (TECHNICAL), LAFIAGI </b> 
 						   &nbsp; &nbsp; <a href="#login" class="btn btn-primary btn-lg bold" data-toggle="modal" data-target="#loginMenu"> &nbsp; Login &nbsp; <span class="fa fa-sign-in ">  </span> </a>
 						  </h3>
 						  </div>
