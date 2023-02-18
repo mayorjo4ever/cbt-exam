@@ -1,7 +1,6 @@
 <?php 
-
 	// control type of error displayed 
-	error_reporting(1); // this disables E_Notice but give warnings
+	error_reporting(E_ALL^E_NOTICE); 	
 	/////////////////////////////
 	
 	/// auto start session if not yet started...

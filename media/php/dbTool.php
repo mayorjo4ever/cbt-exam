@@ -1,9 +1,6 @@
 <?php
 	  
-	if(!isset($_SESSION)) session_start();
-	
-	
-	
+	if(!isset($_SESSION)) session_start();  
 	
 	class DbTool{
 		
@@ -183,7 +180,7 @@
 			if(!empty($order)) $ord = " ORDER BY ".join(" , ",$order)." ". $direction ;
 			else $ord = "";		
 			
-		  $str = sprintf("SELECT * FROM %s %s %s %s ",$table,empty($where)?"":"WHERE",join(" $operator ",$wheres),$ord);
+		  $str = sprintf("SELECT * FROM %s %s %s %s ",$table,empty($where)?"":"WHERE",@join(" $operator ",$wheres),$ord);
 		  
 		  $stm = $conn->prepare($str);
  		
