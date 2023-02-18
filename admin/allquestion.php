@@ -1,5 +1,4 @@
 <?php 
-
 	require "../media/php/access.php";
 	// request bank informations 
 	require "../media/php/instituteinfos.php";
@@ -41,7 +40,7 @@
 		// $ = 
 		$allQtns = $dbm->getFields($dbm->select("questions",array("year"=>$_SESSION['cosyear'],"code"=>$_SESSION['coscode'],"qtype"=>$_SESSION['questype']),array("num"),"AND","ASC"),
 		array("sn","num","question","option1","option2","option3","option4","option5","answer","marks","optiontype","typeAns","image1","image2","passage","instruction"));
-		$totMarks = array_sum($allQtns['marks']);
+		$totMarks = empty($allQtns)?0:array_sum($allQtns['marks']);
 		
 		$cosInfo = $courses->searchCourse(array("code"=>$_SESSION['coscode'])); 
 		// now fetch all questions 
@@ -236,6 +235,7 @@
                                 <div class="x_title">
                                     <h2> <?php echo  $cosInfo['name'][0]; ?>   <small  class="bold"> ( <?php echo  $cosInfo['code'][0]." | ". $cosInfo['level'][0]." | ".$_SESSION['questype']; ?> ) &nbsp; </small> 
 									 <button class="btn btn-info btn-round" data-toggle="tooltip"  data-placement="top" title=" Total Questions  "> <i><?php echo count($allQtns['sn']);?></i></button> 
+									 <button class="btn btn-info btn-round" data-toggle="tooltip"  data-placement="top" title=" Total Questions  "> <i><?php echo empty($allQtns)?0:count($allQtns['sn']);?></i></button> 
 									 <button class="btn btn-danger btn-round" name="delSel" id="delSel"> <i>Delete Selected</i></button>									
 									</h2>  
 									<div class="navbar-right"> <small>Total Marks </small> <button class="btn btn-round btn-primary"  data-toggle="tooltip"  data-placement="top" title=" Total Marks  ">
@@ -264,7 +264,7 @@
 									<!-- now list all courses available or searched -->
                                         <tbody>
                                              <?php $sn = 0; 
-									foreach($allQtns['question'] as $qtn ){  ?>
+									if(!empty($allQtns))foreach($allQtns['question'] as $qtn ){  ?>
                                             <tr class="odd pointer">
                                                 <td class="a-center "> 
                                                     <input type="checkbox" class="qtnDel checkbox tableflat" name="qtnDel[]" value="<?php echo $allQtns['sn'][$sn]; ?>">
